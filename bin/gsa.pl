@@ -1,24 +1,53 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -I ../lib/
 
 use strict;
 use warnings;
 
+use GSA;
 use Data::Dumper;
-use XML::Simple;
 
-my $xs = XML::Simple->new(
-    'AttrIndent' => 1,
-    'KeepRoot'   => 1,
-    'ForceArray' => ['gsa']
-);
-my $xml = $xs->XMLout(
-    {   'gsa' => [
-            { 'name' => 'abc', 'value' => 122 },
-            { 'name' => 'dce', 'value' => 142 }
-        ]
-    }
+my $gsa = GSA->new();
+
+my $xml = $gsa->create(
+    [   {   'action'  => 'add',
+            'records' => [
+                {   'url'      => 'www.optimus.pt/particulares',
+                    'mimetype' => 'text/plain',
+                    'action'   => 'delete',
+                    'metadata' => [
+                        { 'name' => 'John', 'content' => 'Jenny Wong' },
+                        {   'name' => 'url',
+                            'content' =>
+                                'http://www.corp.enterprise.com/search/employeesearch.php?q=jwong'
+                        }
+                    ],
+                },
+                {   'url'      => 'www.optimus.pt/empresas',
+                    'mimetype' => 'text/plain'
+                }
+            ],
+        },
+        {   'action'  => 'delete',
+            'records' => [
+                {   'url'      => 'www.optimus.pt/particulares',
+                    'mimetype' => 'text/plain',
+                    'action'   => 'delete',
+                    'metadata' => [
+                        { 'name' => 'John', 'content' => 'Jenny Wong' },
+                        {   'name' => 'url',
+                            'content' =>
+                                'http://www.corp.enterprise.com/search/employeesearch.php?q=jwong'
+                        }
+                    ],
+                },
+                {   'url'      => 'www.optimus.pt/empresas',
+                    'mimetype' => 'text/plain'
+                }
+            ],
+        }
+    ]
 );
 
-die Dumper $xml;
+print $gsa->xml();
 
 1;

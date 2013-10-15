@@ -37,9 +37,6 @@ sub create {
 
     my $writer = XML::Writer->new(
         OUTPUT      => 'self',
-        'ENCODING'  => 'utf-8',
-        DATAMODE    => 1,
-        DATA_INDENT => 4
     );
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
 
@@ -60,6 +57,7 @@ sub create {
     return $writer->to_string;
 }
 
+#private methods
 sub _add_group {
     my ( $self, $writer, $group ) = @_;
 
@@ -91,6 +89,7 @@ sub _add_record {
     $element{'action'} = $record->{'action'}
         if $record->{'action'};
 
+    #TODO: according to feed type, change the way it interprets this
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
         $writer->startTag( 'record', %element );
         $self->_add_metadata( $writer, $record->{'metadata'} );
