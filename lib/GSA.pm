@@ -35,9 +35,7 @@ sub create {
 
     return unless $data && ref $data eq 'ARRAY';
 
-    my $writer = XML::Writer->new(
-        OUTPUT      => 'self',
-    );
+    my $writer = XML::Writer->new( OUTPUT => 'self', );
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
 
     $writer->startTag('gsafeed');
@@ -63,11 +61,11 @@ sub _add_group {
 
     return unless $writer && $group && ref $group eq 'HASH';
 
-    my %element;
-    $element{'action'} = $group->{'action'}
+    my %attributes;
+    $attributes{'action'} = $group->{'action'}
         if defined $group->{'action'};
 
-    $writer->startTag( 'group', %element );
+    $writer->startTag( 'group', %attributes );
 
     for my $record ( @{ $group->{'records'} || [] } ) {
         $self->_add_record( $writer, $record );
@@ -81,25 +79,51 @@ sub _add_record {
 
     return unless $writer && $record && ref $record eq 'HASH';
 
-    my %element = (
-        'url'      => $record->{'url'},
-        'mimetype' => $record->{'mimetype'},
-    );
+    #url and mimetype are mandatory parameters for the record
+    return unless $record->{'url'} && $record->{'mimetype'};
 
-    $element{'action'} = $record->{'action'}
-        if $record->{'action'};
+    my $attributes = $self->_record_attributes( $record );
 
     #TODO: according to feed type, change the way it interprets this
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
-        $writer->startTag( 'record', %element );
+        $writer->startTag( 'record', %{ $attributes || {} } );
         $self->_add_metadata( $writer, $record->{'metadata'} );
 
         #TODO: support content as CDATA
         $writer->endTag('record');
     }
     else {
-        $writer->dataElement( 'record', '', %element );
+        $writer->dataElement( 'record', '', %{ $attributes || {} } );
     }
+}
+
+#creates record attributes
+sub _record_attributes {
+    my ( $self, $record ) = @_;
+
+    return {} unless $record && ref $record eq 'HASH';
+
+    my %attributes = (
+        'url'      => $record->{'url'},
+        'mimetype' => $record->{'mimetype'},
+    );
+
+    $attributes{'action'} = $record->{'action'}
+        if ( $record->{'action'} && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' ) );
+    $attributes{'lock'} = $record->{'lock'}
+        if ( $record->{'lock'}
+        && ( $record->{'lock'} eq 'true' || $record->{'lock'} eq 'false' ) );
+    $attributes{'displayurl'} = $record->{'displayurl'}
+        if $record->{'displayurl'};
+    $attributes{'last-modified'} = $record->{'last-modified'}
+        if $record->{'last-modified'};
+    $attributes{'pagerank'} = $record->{'pagerank'}
+        if $self->type eq 'full' && defined $record->{'pagerank'};
+    $attributes{'crawl-immediately'} = $record->{'crawl-immediately'}
+        if ( $record->{'crawl-immediately'} && ( $record->{'crawl-immediately'} eq 'true'
+            || $record->{'crawl-immediately'} eq 'false' ) );
+
+    return \%attributes;
 }
 
 sub _add_metadata {
@@ -111,12 +135,12 @@ sub _add_metadata {
     for my $meta ( @{ $metadata || [] } ) {
         next unless $meta->{'name'} && $meta->{'content'};
 
-        my %element = (
+        my %attributes = (
             'name'    => $meta->{'name'},
             'content' => $meta->{'content'},
         );
 
-        $writer->dataElement( 'meta', '', %element );
+        $writer->dataElement( 'meta', '', %attributes );
     }
 
     $writer->endTag('metadata');

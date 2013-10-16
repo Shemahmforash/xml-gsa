@@ -14,13 +14,6 @@ my $xml = $gsa->create(
                 {   'url'      => 'www.optimus.pt/particulares',
                     'mimetype' => 'text/plain',
                     'action'   => 'delete',
-                    'metadata' => [
-                        { 'name' => 'John', 'content' => 'Jenny Wong' },
-                        {   'name' => 'url',
-                            'content' =>
-                                'http://www.corp.enterprise.com/search/employeesearch.php?q=jwong'
-                        }
-                    ],
                 },
                 {   'url'      => 'www.optimus.pt/empresas',
                     'mimetype' => 'text/plain'
