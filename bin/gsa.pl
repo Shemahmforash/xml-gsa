@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use GSA;
+use XML::GSA;
 use Data::Dumper;
 
-my $gsa = GSA->new();
+my $gsa = XML::GSA->new();
 
 my $xml = $gsa->create(
     [   {   'action'  => 'add',

@@ -1,9 +1,10 @@
-package GSA;
+package XML::GSA;
 
 use Moose;
 use Scalar::Util ();
 use XML::Writer;
 use Data::Dumper;
+use Carp;
 
 use namespace::autoclean;
 
@@ -16,10 +17,10 @@ has 'type' => (
 has 'datasource' => (
     is      => 'ro',
     isa     => 'Str',
-    default => 'Beta-Optimus'
+    default => 'Source'
 );
 
-has 'url' => (
+has 'base_url' => (
     is      => 'ro',
     isa     => 'Str',
     default => 'http://www.optimus.pt'
@@ -33,7 +34,8 @@ has 'xml' => (
 sub create {
     my ( $self, $data ) = @_;
 
-    return unless $data && ref $data eq 'ARRAY';
+    croak("An array data structure must be passed as parameter ")
+        unless $data && ref $data eq 'ARRAY';
 
     my $writer = XML::Writer->new( OUTPUT => 'self', );
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
@@ -82,7 +84,7 @@ sub _add_record {
     #url and mimetype are mandatory parameters for the record
     return unless $record->{'url'} && $record->{'mimetype'};
 
-    my $attributes = $self->_record_attributes( $record );
+    my $attributes = $self->_record_attributes($record);
 
     #TODO: according to feed type, change the way it interprets this
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
@@ -104,12 +106,16 @@ sub _record_attributes {
     return {} unless $record && ref $record eq 'HASH';
 
     my %attributes = (
-        'url'      => $record->{'url'},
+        'url' => $record->{'url'} =~ /^http/
+        ? $record->{'url'}
+        : sprintf( '%s%s', $self->base_url, $record->{'url'} ),
         'mimetype' => $record->{'mimetype'},
     );
 
     $attributes{'action'} = $record->{'action'}
-        if ( $record->{'action'} && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' ) );
+        if ( $record->{'action'}
+        && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' )
+        );
     $attributes{'lock'} = $record->{'lock'}
         if ( $record->{'lock'}
         && ( $record->{'lock'} eq 'true' || $record->{'lock'} eq 'false' ) );
@@ -120,8 +126,11 @@ sub _record_attributes {
     $attributes{'pagerank'} = $record->{'pagerank'}
         if $self->type eq 'full' && defined $record->{'pagerank'};
     $attributes{'crawl-immediately'} = $record->{'crawl-immediately'}
-        if ( $record->{'crawl-immediately'} && ( $record->{'crawl-immediately'} eq 'true'
-            || $record->{'crawl-immediately'} eq 'false' ) );
+        if (
+        $record->{'crawl-immediately'}
+        && (   $record->{'crawl-immediately'} eq 'true'
+            || $record->{'crawl-immediately'} eq 'false' )
+        );
 
     return \%attributes;
 }
