@@ -59,7 +59,6 @@ sub create {
     return $writer->to_string;
 }
 
-#private methods
 sub _add_group {
     my ( $self, $writer, $group ) = @_;
 
@@ -114,6 +113,7 @@ sub _record_attributes {
         'mimetype' => $record->{'mimetype'},
     );
 
+    #TODO:improve this filtering according to feed type
     $attributes{'action'} = $record->{'action'}
         if ( $record->{'action'}
         && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' )
