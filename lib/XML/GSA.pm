@@ -23,7 +23,7 @@ has 'datasource' => (
 has 'base_url' => (
     is      => 'ro',
     isa     => 'Str',
-    default => 'http://www.optimus.pt'
+    default => 'http://www.icdif.com'
 );
 
 has 'xml' => (
@@ -34,8 +34,10 @@ has 'xml' => (
 sub create {
     my ( $self, $data ) = @_;
 
-    croak("An array data structure must be passed as parameter ")
-        unless $data && ref $data eq 'ARRAY';
+    unless ( $data && ref $data eq 'ARRAY' ) {
+        carp ("An array data structure must be passed as parameter");
+        return;
+    }
 
     my $writer = XML::Writer->new( OUTPUT => 'self', );
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
