@@ -20,10 +20,10 @@ has 'datasource' => (
     default => 'Source'
 );
 
+#base url to be preppended to all urls
 has 'base_url' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'http://www.icdif.com'
+    is  => 'ro',
+    isa => 'Str',
 );
 
 has 'xml' => (
@@ -35,7 +35,7 @@ sub create {
     my ( $self, $data ) = @_;
 
     unless ( $data && ref $data eq 'ARRAY' ) {
-        carp ("An array data structure must be passed as parameter");
+        carp("An array data structure must be passed as parameter");
         return;
     }
 
@@ -104,16 +104,25 @@ sub _add_record {
 sub _record_attributes {
     my ( $self, $record ) = @_;
 
-    return {} unless $record && ref $record eq 'HASH';
+    #must be a full record url
+    #that is: no base url, the url in record must include the domain
+    #base url and url in record can't include the domain at the same time
+    if ( ( !$self->base_url && $record->{'url'} !~ /^http/ )
+        || $self->base_url && $record->{'url'} =~ /^http/ )
+    {
+        return {};
+    }
 
+    #mandatory attributes
     my %attributes = (
-        'url' => $record->{'url'} =~ /^http/
-        ? $record->{'url'}
-        : sprintf( '%s%s', $self->base_url, $record->{'url'} ),
+        'url' => $self->base_url
+        ? sprintf( '%s%s', $self->base_url, $record->{'url'} )
+        : $record->{'url'},
         'mimetype' => $record->{'mimetype'},
     );
 
     #TODO:improve this filtering according to feed type
+    #optional attributes
     $attributes{'action'} = $record->{'action'}
         if ( $record->{'action'}
         && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' )

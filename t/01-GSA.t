@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 15;
+use Test::More tests => 18;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -57,6 +57,43 @@ is( $xml = $gsa->create( [ { 'action' => 'delete', 'records' => [ {} ] } ] ),
     'create xml using structure with one group, properties,and an invalid record'
 );
 
+is( $gsa->create( [ { 'action' => 'delete', 'records' => [ {'url' => '/particulares'} ] } ] ),
+    sprintf(
+        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
+        $gsa->datasource(), $gsa->type()
+    ),
+    'create xml using structure with one group, properties,and an invalid record (invalid url)'
+);
+
+is( $gsa->create(
+        [   {   'action'  => 'delete',
+                'records' => [
+                    { 'url' => 'http://icdif.com/particulares/', 'mimetype' => 'text/plain' }
+                ]
+            }
+        ]
+    ),
+    sprintf(
+        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record url="%s" mimetype="text/plain"></record></group></gsafeed>',
+        $gsa->datasource(),
+        $gsa->type(),
+        'http://icdif.com/particulares/',
+    ),
+    'create xml using structure with one group, properties and one valid record without base url'
+);
+
+$gsa = XML::GSA->new('base_url' => 'http://icdif.com');
+is( $gsa->create( [ { 'action' => 'delete', 'records' => [ {'url' => '/particulares'} ] } ] ),
+    sprintf(
+        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
+        $gsa->datasource(), $gsa->type()
+    ),
+    'create xml using structure with one group, properties,and an invalid record (both url and base_url have full paths)'
+);
+
 is( $gsa->create(
         [   {   'action'  => 'delete',
                 'records' => [
@@ -75,7 +112,7 @@ is( $gsa->create(
             '/particulares/',
         ),
     ),
-    'create xml using structure with one group, properties and one valid record'
+    'create xml using structure with one group, properties and one valid record with base url'
 );
 
 is( $gsa->create(

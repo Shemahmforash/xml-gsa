@@ -6,23 +6,23 @@ use warnings;
 use XML::GSA;
 use Data::Dumper;
 
-my $gsa = XML::GSA->new();
+my $gsa = XML::GSA->new('base_url' => 'http://www.optimus.pt');
 
 my $xml = $gsa->create(
     [   {   'action'  => 'add',
             'records' => [
-                {   'url'      => 'www.optimus.pt/particulares',
+                {   'url'      => '/particulares',
                     'mimetype' => 'text/plain',
                     'action'   => 'delete',
                 },
-                {   'url'      => 'www.optimus.pt/empresas',
+                {   'url'      => '/empresas',
                     'mimetype' => 'text/plain'
                 }
             ],
         },
         {   'action'  => 'delete',
             'records' => [
-                {   'url'      => 'www.optimus.pt/particulares',
+                {   'url'      => '/cliente',
                     'mimetype' => 'text/plain',
                     'action'   => 'delete',
                     'metadata' => [
@@ -33,7 +33,7 @@ my $xml = $gsa->create(
                         }
                     ],
                 },
-                {   'url'      => 'www.optimus.pt/empresas',
+                {   'url'      => '/empresas',
                     'mimetype' => 'text/plain'
                 }
             ],
