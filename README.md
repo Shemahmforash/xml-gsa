@@ -33,7 +33,7 @@ print $gsa->xml();
 This will output:
 
 
-``xml`
+``xml
 <!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>Source</datasource><feedtype>incremental</feedtype></header><group action="add"><record action="delete" url="http://www.icdif.com/particulares" mimetype="text/plain"></record><record url="http://www.icdif.com/empresas" mimetype="text/plain"><metadata><meta content="Empresas" name="og:title"></meta></metadata></record></group></gsafeed>
 ```
