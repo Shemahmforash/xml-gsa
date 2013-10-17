@@ -3,9 +3,13 @@ XML::GSA
 
 Lib that creates xml in google gsa format.
 
+#Dependencies
+
+1. [XML::Writer](https://github.com/josephw/xml-writer-perl)
+
 #How to use it
 
-To create a xml in google search appliance format, you can use this lib like the following:
+To create a xml in google search appliance format, you can use this lib in the following way:
 
 ```perl
 my $gsa = XML::GSA->new();

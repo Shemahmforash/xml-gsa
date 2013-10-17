@@ -1,35 +1,63 @@
 package XML::GSA;
 
-use Moose;
-use Scalar::Util ();
+use strict;
+use warnings;
+
 use XML::Writer;
 use Data::Dumper;
 use Carp;
 
-use namespace::autoclean;
+sub new {
+    my $class = shift;
 
-has 'type' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => 'incremental'    #full || metadata-and-url
-);
+    my %attr = (
+        'type'       => 'incremental',
+        'datasource' => 'web',
+        @_
+    );
 
-has 'datasource' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => 'Source'
-);
+    bless \%attr, $class;
+}
 
-#base url to be preppended to all urls
-has 'base_url' => (
-    is  => 'rw',
-    isa => 'Str',
-);
+#getters and setters
+sub type {
+    my ( $self, $type ) = @_;
 
-has 'xml' => (
-    is  => 'rw',
-    isa => 'Str',
-);
+    return $self->{'type'}
+        unless defined $type;
+
+    $self->{'type'} = $type
+        if ( $type eq 'incremental'
+        || $type eq 'full'
+        || $type eq 'metadata-and-url' );
+}
+
+sub datasource {
+    my ( $self, $datasource ) = @_;
+
+    return $self->{'datasource'}
+        unless defined $datasource;
+
+    $self->{'datasource'} = $datasource;
+}
+
+sub base_url {
+    my ( $self, $base_url ) = @_;
+
+    return $self->{'base_url'}
+        unless defined $base_url;
+
+    $self->{'base_url'} = $base_url;
+}
+
+sub xml {
+    my ( $self, $xml ) = @_;
+
+    return $self->{'xml'}
+        unless defined $xml;
+
+    $self->{'xml'} = $xml;
+}
 
 sub create {
     my ( $self, $data ) = @_;
@@ -111,6 +139,7 @@ sub _record_content {
     elsif ( $record->{'mimetype'} eq 'text/html' ) {
         $writer->cdataElement( 'content', $record->{'content'} );
     }
+
     #else {
     #TODO support other mimetype with base64 encoding content
     #}
@@ -190,5 +219,4 @@ sub _add_metadata {
     $writer->endTag('metadata');
 }
 
-no Moose;
-__PACKAGE__->meta->make_immutable;
+1;
