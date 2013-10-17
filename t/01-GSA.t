@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 18;
+use Test::More tests => 19;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -12,7 +12,7 @@ BEGIN {
 
 my $gsa = new_ok('XML::GSA');
 
-can_ok($gsa, qw(create type datasource xml base_url));
+can_ok( $gsa, qw(create type datasource xml base_url) );
 
 is( $gsa->type(), 'incremental', 'type is incremental by default' );
 
@@ -37,9 +37,10 @@ is( my $xml = $gsa->create( [ {} ] ),
     ),
     'create xml using structure with one group'
 );
-is( $xml, $gsa->xml(), 'getting the xml matches the xml generate previously' );
+is( $xml, $gsa->xml(),
+    'getting the xml matches the xml generate previously' );
 
-is( $xml = $gsa->create( [ {'action' => 'delete'} ] ),
+is( $xml = $gsa->create( [ { 'action' => 'delete' } ] ),
     sprintf(
         '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
@@ -57,7 +58,12 @@ is( $xml = $gsa->create( [ { 'action' => 'delete', 'records' => [ {} ] } ] ),
     'create xml using structure with one group, properties,and an invalid record'
 );
 
-is( $gsa->create( [ { 'action' => 'delete', 'records' => [ {'url' => '/particulares'} ] } ] ),
+is( $gsa->create(
+        [   {   'action'  => 'delete',
+                'records' => [ { 'url' => '/particulares' } ]
+            }
+        ]
+    ),
     sprintf(
         '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
@@ -69,7 +75,9 @@ is( $gsa->create( [ { 'action' => 'delete', 'records' => [ {'url' => '/particula
 is( $gsa->create(
         [   {   'action'  => 'delete',
                 'records' => [
-                    { 'url' => 'http://icdif.com/particulares/', 'mimetype' => 'text/plain' }
+                    {   'url'      => 'http://icdif.com/particulares/',
+                        'mimetype' => 'text/plain'
+                    }
                 ]
             }
         ]
@@ -84,8 +92,13 @@ is( $gsa->create(
     'create xml using structure with one group, properties and one valid record without base url'
 );
 
-$gsa = XML::GSA->new('base_url' => 'http://icdif.com');
-is( $gsa->create( [ { 'action' => 'delete', 'records' => [ {'url' => '/particulares'} ] } ] ),
+$gsa = XML::GSA->new( 'base_url' => 'http://icdif.com' );
+is( $gsa->create(
+        [   {   'action'  => 'delete',
+                'records' => [ { 'url' => '/particulares' } ]
+            }
+        ]
+    ),
     sprintf(
         '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
@@ -166,5 +179,40 @@ is( $gsa->create(
     ),
     'create xml using structure with one group, properties and one valid record with valid metadata'
 );
+
+$gsa->type('full');
+is( $gsa->create(
+        [   {   'action'  => 'delete',
+                'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'action'   => 'delete',
+                        'content'  => 'Conteúdo'
+                    },
+                    {   'url'      => '/empresas',
+                        'mimetype' => 'text/html',
+                        'content'  => '<html></html>'
+                    }
+                ]
+            }
+        ]
+    ),
+    sprintf(
+        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record action="delete" url="%s" mimetype="text/plain"><content>Conteúdo</content></record><record url="%s" mimetype="text/html"><content><![CDATA[<html></html>]]></content></record></group></gsafeed>',
+        $gsa->datasource(),
+        $gsa->type(),
+        sprintf( '%s%s',
+            $gsa->base_url,
+            '/particulares',
+        ),
+        sprintf( '%s%s',
+            $gsa->base_url,
+            '/empresas',
+        ),
+    ),
+    'create xml using structure with one group, properties and two valid records with content (full feed)'
+);
+
 
 1;

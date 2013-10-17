@@ -9,20 +9,20 @@ use Carp;
 use namespace::autoclean;
 
 has 'type' => (
-    is      => 'ro',
+    is      => 'rw',
     isa     => 'Str',
     default => 'incremental'    #full || metadata-and-url
 );
 
 has 'datasource' => (
-    is      => 'ro',
+    is      => 'rw',
     isa     => 'Str',
     default => 'Source'
 );
 
 #base url to be preppended to all urls
 has 'base_url' => (
-    is  => 'ro',
+    is  => 'rw',
     isa => 'Str',
 );
 
@@ -87,18 +87,33 @@ sub _add_record {
 
     my $attributes = $self->_record_attributes($record);
 
+    $writer->startTag( 'record', %{ $attributes || {} } );
+
     #TODO: according to feed type, change the way it interprets this
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
-        $writer->startTag( 'record', %{ $attributes || {} } );
         $self->_add_metadata( $writer, $record->{'metadata'} );
-
-        #TODO: support content in record (as text and CDATA)
-
-        $writer->endTag('record');
     }
-    else {
-        $writer->dataElement( 'record', '', %{ $attributes || {} } );
+
+    $self->_record_content( $writer, $record )
+        if $self->type eq 'full';
+
+    $writer->endTag('record');
+}
+
+sub _record_content {
+    my ( $self, $writer, $record ) = @_;
+
+    return unless $record->{'content'};
+
+    if ( $record->{'mimetype'} eq 'text/plain' ) {
+        $writer->dataElement( 'content', $record->{'content'} );
     }
+    elsif ( $record->{'mimetype'} eq 'text/html' ) {
+        $writer->cdataElement( 'content', $record->{'content'} );
+    }
+    #else {
+    #TODO support other mimetype with base64 encoding content
+    #}
 }
 
 #creates record attributes
