@@ -11,7 +11,7 @@ use namespace::autoclean;
 has 'type' => (
     is      => 'ro',
     isa     => 'Str',
-    default => 'incremental'
+    default => 'incremental'    #full || metadata-and-url
 );
 
 has 'datasource' => (
@@ -92,7 +92,8 @@ sub _add_record {
         $writer->startTag( 'record', %{ $attributes || {} } );
         $self->_add_metadata( $writer, $record->{'metadata'} );
 
-        #TODO: support content as CDATA
+        #TODO: support content in record (as text and CDATA)
+
         $writer->endTag('record');
     }
     else {
@@ -121,7 +122,6 @@ sub _record_attributes {
         'mimetype' => $record->{'mimetype'},
     );
 
-    #TODO:improve this filtering according to feed type
     #optional attributes
     $attributes{'action'} = $record->{'action'}
         if ( $record->{'action'}
@@ -132,16 +132,25 @@ sub _record_attributes {
         && ( $record->{'lock'} eq 'true' || $record->{'lock'} eq 'false' ) );
     $attributes{'displayurl'} = $record->{'displayurl'}
         if $record->{'displayurl'};
-    $attributes{'last-modified'} = $record->{'last-modified'}
+    $attributes{'last-modified'} = $record->{ 'last-modified'
+        } #TODO: validate if it is in the format  RFC822 (Mon, 15 Nov 2004 04:58:08 GMT)
         if $record->{'last-modified'};
+    $attributes{'authmethod'} = $record->{'authmethod'}
+        if $record->{ 'authmethod'
+            };    #validate if it is none, httpbasic, ntlm, or httpsso
     $attributes{'pagerank'} = $record->{'pagerank'}
-        if $self->type eq 'full' && defined $record->{'pagerank'};
+        if $self->type ne 'metadata-and-url' && defined $record->{'pagerank'};
     $attributes{'crawl-immediately'} = $record->{'crawl-immediately'}
         if (
-        $record->{'crawl-immediately'}
+           $self->datasource eq 'web'
+        && $record->{'crawl-immediately'}
         && (   $record->{'crawl-immediately'} eq 'true'
             || $record->{'crawl-immediately'} eq 'false' )
         );
+    $attributes{'crawlonce'} = $record->{'crawlonce'}
+        if $self->datasource eq 'web'
+            && defined $record->{'crawlonce'}
+            && $self->type() eq 'metadata-and-url';
 
     return \%attributes;
 }
