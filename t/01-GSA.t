@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 22;
+use Test::More tests => 33;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -214,7 +214,6 @@ is( $gsa->create(
     'create xml using structure with one group, properties, and two valid records with content (full feed)'
 );
 
-
 like(
     $gsa->create(
         [   {   'records' => [
@@ -258,6 +257,173 @@ unlike(
     ),
     qr/<record.*action="aaa".*>.*<\/record>/,
     'record invalid action attr value'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'lock'     => 'true',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*lock="true".*>.*<\/record>/,
+    'record valid lock attr value (true)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'lock'     => 'false',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*lock="false".*>.*<\/record>/,
+    'record valid lock attr value (false)'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'lock'     => 'aaa',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*lock="aaa".*>.*<\/record>/,
+    'record invalid lock attr value'
+);
+
+#TODO: test last-mofified date format
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'authmethod' => 'none',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*authmethod="none".*>.*<\/record>/,
+    'record valid authmethod attr value (none)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'authmethod' => 'ntlm',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*authmethod="ntlm".*>.*<\/record>/,
+    'record valid authmethod attr value (ntlm)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'authmethod' => 'httpbasic',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*authmethod="httpbasic".*>.*<\/record>/,
+    'record valid authmethod attr value (httpbasic)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'authmethod' => 'httpsso',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*authmethod="httpsso".*>.*<\/record>/,
+    'record valid authmethod attr value (httpsso)'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'authmethod' => 'aaa',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*authmethod="aaa".*>.*<\/record>/,
+    'record invalid authmethod attr value'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'               => '/particulares',
+                        'mimetype'          => 'text/plain',
+                        'crawl-immediately' => 'true',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-immediately="true".*>.*<\/record>/,
+    'record valid crawl-immediately attr value (true)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'               => '/particulares',
+                        'mimetype'          => 'text/plain',
+                        'crawl-immediately' => 'false',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-immediately="false".*>.*<\/record>/,
+    'record valid crawl-immediately attr value (false)'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'               => '/particulares',
+                        'mimetype'          => 'text/plain',
+                        'crawl-immediately' => 'aaa',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-immediately="aaa".*>.*<\/record>/,
+    'record invalid crawl-immediately attr value'
 );
 
 1;

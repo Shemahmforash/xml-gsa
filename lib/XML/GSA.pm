@@ -162,9 +162,8 @@ sub _record_attributes {
         'mimetype' => $record->{'mimetype'},
     );
 
-    #TODO: tests for all these optional attributes
+    ####optional attributes####
 
-    #optional attributes
     #action is delete or add
     $attributes{'action'} = $record->{'action'}
         if $record->{'action'}
@@ -174,8 +173,10 @@ sub _record_attributes {
     $attributes{'lock'} = $record->{'lock'}
         if $record->{'lock'}
             && $record->{'lock'} =~ /^(true|false)$/;
+
     $attributes{'displayurl'} = $record->{'displayurl'}
         if $record->{'displayurl'};
+
     $attributes{'last-modified'} = $record->{ 'last-modified'
         } #TODO: validate if it is in the format  RFC822 (Mon, 15 Nov 2004 04:58:08 GMT) - using DateTime::Format::Mail;
         if $record->{'last-modified'};

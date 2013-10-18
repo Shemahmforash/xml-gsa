@@ -9,19 +9,13 @@ use Data::Dumper;
 my $gsa = XML::GSA->new('base_url' => 'http://www.optimus.pt', 'type' => 'full');
 
 my $xml = $gsa->create(
-    [   {   'action'  => 'delete',
-            'records' => [
+    [   {   'records' => [
                 {   'url'      => '/particulares',
                     'mimetype' => 'text/plain',
-                    'action'   => 'delete',
-                    'content'  => 'Conteúdo'
+                    'lock'     => 'aaa',
                 },
-                {   'url'      => '/empresas',
-                    'mimetype' => 'text/html',
-                    'content'  => '<html></html>'
-                }
-            ],
-        },
+            ]
+        }
     ]
 );
 
