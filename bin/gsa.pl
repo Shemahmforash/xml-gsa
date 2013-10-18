@@ -3,16 +3,33 @@
 use strict;
 use warnings;
 
-use XML::GSA;
+use XML::GSA ();
 use Data::Dumper;
+use DateTime;
+use Date::Parse;
+
+=for
+my $epoch    = Date::Parse::str2time("2013-08-12 11:09:43");
+my $datetime = DateTime->from_epoch(
+    'epoch'     => $epoch,
+    'time_zone' => 'local',
+);
+
+#die Dumper $datetime->strftime('%a, %d %b %y %T %Z');
+
+die Dumper $datetime->strftime('%a, %d %b %Y %H:%M:%S %z');
+
+#RFC822 (Mon, 15 Nov 2004 04:58:08 GMT)
+=cut
 
 my $gsa = XML::GSA->new('base_url' => 'http://www.optimus.pt', 'type' => 'full');
 
 my $xml = $gsa->create(
     [   {   'records' => [
-                {   'url'      => '/particulares',
-                    'mimetype' => 'text/plain',
-                    'lock'     => 'aaa',
+                {   'url'           => '/particulares',
+                    'mimetype'      => 'text/plain',
+                    'lock'          => 'aaa',
+                    'last-modified' => '2013/10/10 18:09:43'
                 },
             ]
         }

@@ -6,6 +6,8 @@ use warnings;
 use XML::Writer;
 use Data::Dumper;
 use Carp;
+use DateTime ();
+use Date::Parse ();
 
 sub new {
     my $class = shift;
@@ -177,9 +179,14 @@ sub _record_attributes {
     $attributes{'displayurl'} = $record->{'displayurl'}
         if $record->{'displayurl'};
 
-    $attributes{'last-modified'} = $record->{ 'last-modified'
-        } #TODO: validate if it is in the format  RFC822 (Mon, 15 Nov 2004 04:58:08 GMT) - using DateTime::Format::Mail;
-        if $record->{'last-modified'};
+    #validate datetime format
+    if ( $record->{'last-modified'} ) {
+        my $date = $self->_to_RFC822_date( $record->{'last-modified'} );
+
+        $attributes{'last-modified'} = $date
+            if $date;
+    }
+
 
     #allowed values for authmethod
     $attributes{'authmethod'} = $record->{'authmethod'}
@@ -223,6 +230,25 @@ sub _add_metadata {
     }
 
     $writer->endTag('metadata');
+}
+
+#receives a string representing a datetime and returns its RFC822 representation
+sub _to_RFC822_date {
+    my ( $self, $value ) = @_;
+
+    my $epoch    = Date::Parse::str2time( $value );
+
+    unless ( $epoch ) {
+        carp("Unknown date format received");
+        return;
+    }
+
+    my $datetime = DateTime->from_epoch(
+        'epoch'     => $epoch,
+        'time_zone' => 'local',
+    );
+
+    return $datetime->strftime('%a, %d %b %Y %H:%M:%S %z');
 }
 
 1;

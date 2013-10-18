@@ -6,6 +6,8 @@ Lib that creates xml in google gsa format.
 #Dependencies
 
 1. [XML::Writer](https://github.com/josephw/xml-writer-perl)
+1. [DateTime](http://search.cpan.org/~drolsky/DateTime-1.03/)
+1. [Date::Parse](http://search.cpan.org/~gbarr/TimeDate-2.30/lib/Date/Parse.pm)
 
 #How to use it
 
