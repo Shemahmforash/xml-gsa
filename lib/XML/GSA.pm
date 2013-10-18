@@ -10,59 +10,55 @@ use Carp;
 sub new {
     my $class = shift;
 
-    my %attr = (
+    return bless {
         'type'       => 'incremental',
         'datasource' => 'web',
         @_
-    );
-
-    bless \%attr, $class;
+        },
+        ref $class || $class;
 }
 
 #getters and setters
 sub type {
-    my ( $self, $type ) = @_;
+    my ( $self, $value ) = @_;
 
-    return $self->{'type'}
-        unless defined $type;
+    $self->{'type'} = $value
+        if $value && $value =~ /(incremental|full|metadata-and-url)/;
 
-    $self->{'type'} = $type
-        if ( $type eq 'incremental'
-        || $type eq 'full'
-        || $type eq 'metadata-and-url' );
+    return $self->{'type'};
 }
 
 sub datasource {
-    my ( $self, $datasource ) = @_;
+    my ( $self, $value ) = @_;
 
-    return $self->{'datasource'}
-        unless defined $datasource;
+    $self->{'datasource'} = $value
+        if $value;
 
-    $self->{'datasource'} = $datasource;
+    return $self->{'datasource'};
 }
 
 sub base_url {
-    my ( $self, $base_url ) = @_;
+    my ( $self, $value ) = @_;
 
-    return $self->{'base_url'}
-        unless defined $base_url;
+    $self->{'base_url'} = $value
+        if $value; 
 
-    $self->{'base_url'} = $base_url;
+    return $self->{'base_url'};
 }
 
 sub xml {
-    my ( $self, $xml ) = @_;
+    my ( $self, $value ) = @_;
 
-    return $self->{'xml'}
-        unless defined $xml;
+    $self->{'xml'} = $value
+        if $value;
 
-    $self->{'xml'} = $xml;
+    return $self->{'xml'};
 }
 
 sub create {
     my ( $self, $data ) = @_;
 
-    unless ( $data && ref $data eq 'ARRAY' ) {
+    unless ( ref $data eq 'ARRAY' ) {
         carp("An array data structure must be passed as parameter");
         return;
     }
@@ -117,7 +113,6 @@ sub _add_record {
 
     $writer->startTag( 'record', %{ $attributes || {} } );
 
-    #TODO: according to feed type, change the way it interprets this
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
         $self->_add_metadata( $writer, $record->{'metadata'} );
     }
@@ -128,6 +123,7 @@ sub _add_record {
     $writer->endTag('record');
 }
 
+#adds record content part
 sub _record_content {
     my ( $self, $writer, $record ) = @_;
 
@@ -166,35 +162,44 @@ sub _record_attributes {
         'mimetype' => $record->{'mimetype'},
     );
 
+    #TODO: tests for all these optional attributes
+
     #optional attributes
+    #action is delete or add
     $attributes{'action'} = $record->{'action'}
-        if ( $record->{'action'}
-        && ( $record->{'action'} eq 'delete' || $record->{'action'} eq 'add' )
-        );
+        if $record->{'action'}
+            && $record->{'action'} =~ /^(delete|add)$/;
+
+    #lock is true or false
     $attributes{'lock'} = $record->{'lock'}
-        if ( $record->{'lock'}
-        && ( $record->{'lock'} eq 'true' || $record->{'lock'} eq 'false' ) );
+        if $record->{'lock'}
+            && $record->{'lock'} =~ /^(true|false)$/;
     $attributes{'displayurl'} = $record->{'displayurl'}
         if $record->{'displayurl'};
     $attributes{'last-modified'} = $record->{ 'last-modified'
-        } #TODO: validate if it is in the format  RFC822 (Mon, 15 Nov 2004 04:58:08 GMT)
+        } #TODO: validate if it is in the format  RFC822 (Mon, 15 Nov 2004 04:58:08 GMT) - using DateTime::Format::Mail;
         if $record->{'last-modified'};
+
+    #allowed values for authmethod
     $attributes{'authmethod'} = $record->{'authmethod'}
-        if $record->{ 'authmethod'
-            };    #validate if it is none, httpbasic, ntlm, or httpsso
+        if $record->{'authmethod'}
+            && $record->{'authmethod'} =~ /^(none|httpbasic|ntlm|httpsso)$/;
+
     $attributes{'pagerank'} = $record->{'pagerank'}
         if $self->type ne 'metadata-and-url' && defined $record->{'pagerank'};
+
+    #true or false and only for web feeds
     $attributes{'crawl-immediately'} = $record->{'crawl-immediately'}
-        if (
-           $self->datasource eq 'web'
-        && $record->{'crawl-immediately'}
-        && (   $record->{'crawl-immediately'} eq 'true'
-            || $record->{'crawl-immediately'} eq 'false' )
-        );
-    $attributes{'crawlonce'} = $record->{'crawlonce'}
         if $self->datasource eq 'web'
-            && defined $record->{'crawlonce'}
-            && $self->type() eq 'metadata-and-url';
+            && $record->{'crawl-immediately'}
+            && $record->{'crawl-immediately'} =~ /^(true|false)$/;
+
+    #for web feeds
+    $attributes{'crawl-once'} = $record->{'crawl-once'}
+        if ( $self->datasource eq 'web'
+            && $self->type() eq 'metadata-and-url'
+        && $record->{'crawl-once'}
+        && $record->{'crawl-once'} =~ /^(true|false)$/);
 
     return \%attributes;
 }
