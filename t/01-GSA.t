@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 19;
+use Test::More tests => 22;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -55,7 +55,7 @@ is( $xml = $gsa->create( [ { 'action' => 'delete', 'records' => [ {} ] } ] ),
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
-    'create xml using structure with one group, properties,and an invalid record'
+    'create xml using structure with one group, properties, and an invalid record'
 );
 
 is( $gsa->create(
@@ -69,7 +69,7 @@ is( $gsa->create(
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
-    'create xml using structure with one group, properties,and an invalid record (invalid url)'
+    'create xml using structure with one group, properties, and an invalid record (invalid url)'
 );
 
 is( $gsa->create(
@@ -89,7 +89,7 @@ is( $gsa->create(
         $gsa->type(),
         'http://icdif.com/particulares/',
     ),
-    'create xml using structure with one group, properties and one valid record without base url'
+    'create xml using structure with one group, properties, and one valid record without base url'
 );
 
 $gsa = XML::GSA->new( 'base_url' => 'http://icdif.com' );
@@ -104,7 +104,7 @@ is( $gsa->create(
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
-    'create xml using structure with one group, properties,and an invalid record (both url and base_url have full paths)'
+    'create xml using structure with one group, properties, and an invalid record (both url and base_url have full paths)'
 );
 
 is( $gsa->create(
@@ -125,7 +125,7 @@ is( $gsa->create(
             '/particulares/',
         ),
     ),
-    'create xml using structure with one group, properties and one valid record with base url'
+    'create xml using structure with one group, properties, and one valid record with base url'
 );
 
 is( $gsa->create(
@@ -149,7 +149,7 @@ is( $gsa->create(
             '/particulares/',
         ),
     ),
-    'create xml using structure with one group, properties and one valid record with invalid metadata'
+    'create xml using structure with one group, properties, and one valid record with invalid metadata'
 );
 
 is( $gsa->create(
@@ -177,7 +177,7 @@ is( $gsa->create(
             '/particulares/',
         ),
     ),
-    'create xml using structure with one group, properties and one valid record with valid metadata'
+    'create xml using structure with one group, properties, and one valid record with valid metadata'
 );
 
 $gsa->type('full');
@@ -211,8 +211,53 @@ is( $gsa->create(
             '/empresas',
         ),
     ),
-    'create xml using structure with one group, properties and two valid records with content (full feed)'
+    'create xml using structure with one group, properties, and two valid records with content (full feed)'
 );
 
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'action'   => 'delete',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*action="delete".*>.*<\/record>/,
+    'record valid action attr value (delete)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'action'   => 'add',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*action="add".*>.*<\/record>/,
+    'record valid action attr value (add)'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'action'   => 'aaa',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*action="aaa".*>.*<\/record>/,
+    'record invalid action attr value'
+);
 
 1;
