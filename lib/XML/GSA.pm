@@ -6,7 +6,7 @@ use warnings;
 use XML::Writer;
 use Data::Dumper;
 use Carp;
-use DateTime ();
+use DateTime    ();
 use Date::Parse ();
 
 sub new {
@@ -43,7 +43,7 @@ sub base_url {
     my ( $self, $value ) = @_;
 
     $self->{'base_url'} = $value
-        if $value; 
+        if $value;
 
     return $self->{'base_url'};
 }
@@ -187,7 +187,6 @@ sub _record_attributes {
             if $date;
     }
 
-
     #allowed values for authmethod
     $attributes{'authmethod'} = $record->{'authmethod'}
         if $record->{'authmethod'}
@@ -205,9 +204,9 @@ sub _record_attributes {
     #for web feeds
     $attributes{'crawl-once'} = $record->{'crawl-once'}
         if ( $self->datasource eq 'web'
-            && $self->type() eq 'metadata-and-url'
+        && $self->type() eq 'metadata-and-url'
         && $record->{'crawl-once'}
-        && $record->{'crawl-once'} =~ /^(true|false)$/);
+        && $record->{'crawl-once'} =~ /^(true|false)$/ );
 
     return \%attributes;
 }
@@ -236,9 +235,9 @@ sub _add_metadata {
 sub _to_RFC822_date {
     my ( $self, $value ) = @_;
 
-    my $epoch    = Date::Parse::str2time( $value );
+    my $epoch = Date::Parse::str2time($value);
 
-    unless ( $epoch ) {
+    unless ($epoch) {
         carp("Unknown date format received");
         return;
     }

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 33;
+use Test::More tests => 39;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -424,6 +424,99 @@ unlike(
     ),
     qr/<record.*crawl-immediately="aaa".*>.*<\/record>/,
     'record invalid crawl-immediately attr value'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'pagerank' => '1',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*pagerank="1".*>.*<\/record>/,
+    'record valid page rank'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'crawl-once' => 'true',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-once="true".*>.*<\/record>/,
+    'valid crawl once attribute in a feed type that does not support crawl-once.'
+);
+
+$gsa->type('metadata-and-url');
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'pagrank'  => '1',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*pagerank="1".*>.*<\/record>/,
+    'valid pagerank attribute in a feed type that does not support pagerank.'
+);
+
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'crawl-once' => 'true',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-once="true".*>.*<\/record>/,
+    'record valid crawl-once attr value (true)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'crawl-once' => 'false',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-once="false".*>.*<\/record>/,
+    'record valid crawl-once attr value (false)'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'crawl-once' => 'aaa',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*crawl-once="aaa".*>.*<\/record>/,
+    'record invalid crawl-once attr value'
 );
 
 1;
