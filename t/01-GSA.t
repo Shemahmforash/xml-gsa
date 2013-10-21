@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 39;
+use Test::More tests => 41;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -304,7 +304,36 @@ unlike(
     'record invalid lock attr value'
 );
 
-#TODO: test last-mofified date format
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'last-modified' => '2013/10/10 18:09:43'
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*last-modified="Thu, 10 Oct 2013 18:09:43 .+".*>.*<\/record>/,
+    'record - valid date format in last-modified attribute'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'        => '/particulares',
+                        'mimetype'   => 'text/plain',
+                        'last-modified' => '2013/10/'
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*last-modified=".+".*>.*<\/record>/,
+    'record - invalid date format in last-modified attribute'
+);
+
 
 like(
     $gsa->create(
