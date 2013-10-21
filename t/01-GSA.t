@@ -3,8 +3,7 @@
 use strict;
 use warnings;
 
-use Data::Dumper;    #TODO: remove this when tests are closed
-use Test::More tests => 41;
+use Test::More tests => 42;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -307,8 +306,8 @@ unlike(
 like(
     $gsa->create(
         [   {   'records' => [
-                    {   'url'        => '/particulares',
-                        'mimetype'   => 'text/plain',
+                    {   'url'           => '/particulares',
+                        'mimetype'      => 'text/plain',
                         'last-modified' => '2013/10/10 18:09:43'
                     },
                 ]
@@ -322,8 +321,8 @@ like(
 unlike(
     $gsa->create(
         [   {   'records' => [
-                    {   'url'        => '/particulares',
-                        'mimetype'   => 'text/plain',
+                    {   'url'           => '/particulares',
+                        'mimetype'      => 'text/plain',
                         'last-modified' => '2013/10/'
                     },
                 ]
@@ -333,7 +332,6 @@ unlike(
     qr/<record.*last-modified=".+".*>.*<\/record>/,
     'record - invalid date format in last-modified attribute'
 );
-
 
 like(
     $gsa->create(
@@ -502,7 +500,6 @@ unlike(
     'valid pagerank attribute in a feed type that does not support pagerank.'
 );
 
-
 like(
     $gsa->create(
         [   {   'records' => [
@@ -546,6 +543,21 @@ unlike(
     ),
     qr/<record.*crawl-once="aaa".*>.*<\/record>/,
     'record invalid crawl-once attr value'
+);
+
+unlike(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'abc'      => 'abc',
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*abc="abc".*>.*<\/record>/,
+    'record unknown attribute'
 );
 
 1;

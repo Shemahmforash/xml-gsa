@@ -28,8 +28,7 @@ my $xml = $gsa->create(
     [   {   'records' => [
                 {   'url'           => '/particulares',
                     'mimetype'      => 'text/plain',
-                    'lock'          => 'aaa',
-                    'last-modified' => '2013/10/10 18:09:43'
+                    'abc' => 'abc'
                 },
             ]
         }
