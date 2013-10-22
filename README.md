@@ -14,7 +14,7 @@ Lib that creates xml in google gsa format.
 To create a xml in google search appliance format, you can use this lib in the following way:
 
 ```perl
-my $gsa = XML::GSA->new();
+my $gsa = XML::GSA->new('base_url' => 'http://icdif.com');
 my $xml = $gsa->create(
     [   {   'action'  => 'add',
             'records' => [
