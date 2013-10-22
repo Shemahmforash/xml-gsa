@@ -297,7 +297,29 @@ Which will output:
 <gsafeed><header><datasource>Source</datasource><feedtype>incremental</feedtype></header><group action="add"><record action="delete" url="http://www.foo.bar/aaa" mimetype="text/plain"></record><record url="http://www.foo.bar/bbb" mimetype="text/plain"><metadata><meta content="BBB" name="og:title"></meta></metadata></record></group></gsafeed>
 
 
-=head1 SUBROUTINES/METHODS
+=head1 METHODS
+
+=head2 new( C<$params> )
+
+    Create a new XML::GSA object:
+
+        my $gsa = XML::GSA->new('base_url' => 'http://foo.bar');
+
+    Arguments of this method are an anonymous hash of parameters:
+
+=head3 datasource
+
+Defines the datasource to be included in the header of the xml.
+
+=head3 type
+
+Defines the type of the feed. This attribute tells the feed what kind of attributes the records are able to receive.
+
+=head3 base_url
+
+Defines a base url to be preppended to all records' urls.
+
+=cut
 
 =head2 type( C<$value> )
 
@@ -379,6 +401,7 @@ L<https://github.com/Shemahmforash/xml-gsa/>
 
 =head1 ACKNOWLEDGEMENTS
 
+Great thanks to Andre Rivotti Casimiro for the invaluable suggestions and the help in setting a cpan compatible module.
 
 =head1 LICENSE AND COPYRIGHT
 
