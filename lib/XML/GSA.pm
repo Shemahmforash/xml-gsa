@@ -146,10 +146,13 @@ sub _record_attributes {
     my ( $self, $record ) = @_;
 
     #must be a full record url
-    #that is: no base url, the url in record must include the domain
+    #that is: if no base url, the url in record must start with http
     #base url and url in record can't include the domain at the same time
-    if ( ( !$self->base_url && $record->{'url'} !~ /^http/ )
-        || $self->base_url && $record->{'url'} =~ /^http/ )
+    if (( !$self->base_url && $record->{'url'} !~ /^http/ )
+        || (   $self->base_url
+            && $self->base_url  =~ /^http/
+            && $record->{'url'} =~ /^http/ )
+        )
     {
         return {};
     }
@@ -343,6 +346,23 @@ Defines a base url to be preppended to all records' urls.
 =head2 create( C<$data> )
 
     Receives an arrayref data structure where each entry represents a group in the xml, generates an xml in GSA format and returns it as a string.
+
+    One can have has many group has one wants, and a group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
+
+    Each hashref in the array corresponding to 'records' can have the following keys:
+
+    * Mandatory
+        * url
+        * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
+    * Optional
+        * action            => (add|delete)
+        * lock              => (true|false)
+        * displayurl        => an url
+        * last-modified     => a well formatted date as string
+        * authmethod        => (none|httpbasic|ntlm|httpsso)
+        * pagerank          => an int number
+        * crawl-immediately => (true|false)
+        * crawl-once        => (true|false)
 
 =cut
 
