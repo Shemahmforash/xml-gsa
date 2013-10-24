@@ -1,6 +1,5 @@
 package XML::GSA;
 
-use 5.006;
 use strict;
 use warnings;
 
@@ -64,6 +63,7 @@ sub create {
     }
 
     my $writer = XML::Writer->new( OUTPUT => 'self', );
+    $writer->xmlDecl("UTF-8");
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
 
     $writer->startTag('gsafeed');
@@ -78,9 +78,10 @@ sub create {
 
     $writer->endTag('gsafeed');
 
-    $self->{'xml'} = $writer->to_string;
+    my $xml = $writer->to_string;
 
-    return $writer->to_string;
+    $self->{'xml'} = $xml;
+    return $xml;
 }
 
 sub _add_group {
@@ -296,6 +297,7 @@ You can use this lib in the following way:
 
 Which will output:
 
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>Source</datasource><feedtype>incremental</feedtype></header><group action="add"><record action="delete" url="http://www.foo.bar/aaa" mimetype="text/plain"></record><record url="http://www.foo.bar/bbb" mimetype="text/plain"><metadata><meta content="BBB" name="og:title"></meta></metadata></record></group></gsafeed>
 

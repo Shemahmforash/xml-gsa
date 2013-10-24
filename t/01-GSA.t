@@ -21,7 +21,8 @@ is( $gsa->create(""), undef, 'another invalid argument passed to create' );
 
 is( $gsa->create( [] ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -30,7 +31,8 @@ is( $gsa->create( [] ),
 
 is( my $xml = $gsa->create( [ {} ] ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -41,7 +43,8 @@ is( $xml, $gsa->xml(),
 
 is( $xml = $gsa->create( [ { 'action' => 'delete' } ] ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -50,7 +53,8 @@ is( $xml = $gsa->create( [ { 'action' => 'delete' } ] ),
 
 is( $xml = $gsa->create( [ { 'action' => 'delete', 'records' => [ {} ] } ] ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -64,7 +68,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -82,7 +87,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record url="%s" mimetype="text/plain"></record></group></gsafeed>',
         $gsa->datasource(),
         $gsa->type(),
@@ -99,7 +105,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
         $gsa->datasource(), $gsa->type()
     ),
@@ -115,7 +122,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record url="%s" mimetype="text/plain"></record></group></gsafeed>',
         $gsa->datasource(),
         $gsa->type(),
@@ -139,7 +147,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record url="%s" mimetype="text/plain"><metadata></metadata></record></group></gsafeed>',
         $gsa->datasource(),
         $gsa->type(),
@@ -167,7 +176,8 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
 <gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record url="%s" mimetype="text/plain"><metadata><meta content="Particulares" name="og:title"></meta></metadata></record></group></gsafeed>',
         $gsa->datasource(),
         $gsa->type(),
@@ -186,7 +196,7 @@ is( $gsa->create(
                     {   'url'      => '/particulares',
                         'mimetype' => 'text/plain',
                         'action'   => 'delete',
-                        'content'  => 'Conteúdo'
+                        'content'  => 'Content'
                     },
                     {   'url'      => '/empresas',
                         'mimetype' => 'text/html',
@@ -197,8 +207,9 @@ is( $gsa->create(
         ]
     ),
     sprintf(
-        '<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
-<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record action="delete" url="%s" mimetype="text/plain"><content>Conteúdo</content></record><record url="%s" mimetype="text/html"><content><![CDATA[<html></html>]]></content></record></group></gsafeed>',
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"><record action="delete" url="%s" mimetype="text/plain"><content>Content</content></record><record url="%s" mimetype="text/html"><content><![CDATA[<html></html>]]></content></record></group></gsafeed>',
         $gsa->datasource(),
         $gsa->type(),
         sprintf( '%s%s',
