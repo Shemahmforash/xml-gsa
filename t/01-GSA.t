@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 42;
+use charnames qw(:full);
+
+use Test::More tests => 43;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -196,7 +198,7 @@ is( $gsa->create(
                     {   'url'      => '/particulares',
                         'mimetype' => 'text/plain',
                         'action'   => 'delete',
-                        'content'  => 'Content'
+                        'content'  => "Content"
                     },
                     {   'url'      => '/empresas',
                         'mimetype' => 'text/html',
@@ -222,6 +224,22 @@ is( $gsa->create(
         ),
     ),
     'create xml using structure with one group, properties, and two valid records with content (full feed)'
+);
+
+like(
+    $gsa->create(
+        [   {   'records' => [
+                    {   'url'      => '/particulares',
+                        'mimetype' => 'text/plain',
+                        'action'   => 'delete',
+                        'content'  => "Conte\N{LATIN SMALL LETTER U WITH ACUTE}do"
+                    },
+                ]
+            }
+        ]
+    ),
+    qr/<record.*><content>Conteúdo<\/content><\/record>/,
+    'Valid utf8 encoding'
 );
 
 like(

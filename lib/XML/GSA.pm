@@ -15,9 +15,17 @@ sub new {
     return bless {
         'type'       => 'incremental',
         'datasource' => 'web',
-        @_
+        @_,
+        'encoding'   => 'UTF-8',#read-only
         },
         ref $class || $class;
+}
+
+#encoding is read-only
+sub encoding {
+    my $self = shift;
+
+    return $self->{'encoding'};
 }
 
 #getters and setters
@@ -79,6 +87,8 @@ sub create {
     $writer->endTag('gsafeed');
 
     my $xml = $writer->to_string;
+    #gsa needs utf8 encoding
+    utf8::encode($xml);
 
     $self->{'xml'} = $xml;
     return $xml;
@@ -348,6 +358,7 @@ Defines a base url to be preppended to all records' urls.
 =head2 create( C<$data> )
 
     Receives an arrayref data structure where each entry represents a group in the xml, generates an xml in GSA format and returns it as a string.
+    Important note: All data passed to create must be in unicode! This class will utf-8 encode it making it compatible with GSA.
 
     One can have has many group has one wants, and a group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
 
