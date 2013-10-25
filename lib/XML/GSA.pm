@@ -71,7 +71,7 @@ sub create {
     }
 
     my $writer = XML::Writer->new( OUTPUT => 'self', );
-    $writer->xmlDecl("UTF-8");
+    $writer->xmlDecl( $self->encoding );
     $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
 
     $writer->startTag('gsafeed');
