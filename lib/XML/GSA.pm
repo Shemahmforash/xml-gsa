@@ -62,6 +62,24 @@ sub xml {
     return $self->{'xml'};
 }
 
+sub groups {
+    my $self = shift;
+
+    return $self->{'groups'} || [];
+}
+
+sub add_group {
+    my ( $self, $value ) = @_;
+
+    return unless ref $value eq 'HASH';
+
+    my $groups = $self->groups();
+
+    my $group = XML::GSA::Group->new( 'action' => $value->{'action'} );
+
+    $group->create( $value->{'records'} );
+}
+
 sub create {
     my ( $self, $data ) = @_;
 
