@@ -62,6 +62,12 @@ sub xml {
     return $self->{'xml'};
 }
 
+sub writer {
+    my $self = shift;
+
+    return $self->{'writer'};
+}
+
 sub groups {
     my $self = shift;
 
@@ -89,22 +95,24 @@ sub create {
     }
 
     my $writer = XML::Writer->new( OUTPUT => 'self', );
-    $writer->xmlDecl( $self->encoding );
-    $writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
+    $self->{'writer'} = $writer;
 
-    $writer->startTag('gsafeed');
-    $writer->startTag('header');
-    $writer->dataElement( 'datasource', $self->datasource() );
-    $writer->dataElement( 'feedtype',   $self->type() );
-    $writer->endTag('header');
+    $self->writer->xmlDecl( $self->encoding );
+    $self->writer->doctype( "gsafeed", '-//Google//DTD GSA Feeds//EN', "" );
+
+    $self->writer->startTag('gsafeed');
+    $self->writer->startTag('header');
+    $self->writer->dataElement( 'datasource', $self->datasource() );
+    $self->writer->dataElement( 'feedtype',   $self->type() );
+    $self->writer->endTag('header');
 
     for my $group ( @{ $data || [] } ) {
-        $self->_add_group( $writer, $group );
+        $self->_add_group( $group );
     }
 
-    $writer->endTag('gsafeed');
+    $self->writer->endTag('gsafeed');
 
-    my $xml = $writer->to_string;
+    my $xml = $self->writer->to_string;
     #gsa needs utf8 encoding
     utf8::encode($xml);
 
@@ -113,56 +121,56 @@ sub create {
 }
 
 sub _add_group {
-    my ( $self, $writer, $group ) = @_;
+    my ( $self, $group ) = @_;
 
-    return unless $writer && $group && ref $group eq 'HASH';
+    return unless $self->writer && $group && ref $group eq 'HASH';
 
     my %attributes;
     $attributes{'action'} = $group->{'action'}
         if defined $group->{'action'};
 
-    $writer->startTag( 'group', %attributes );
+    $self->writer->startTag( 'group', %attributes );
 
     for my $record ( @{ $group->{'records'} || [] } ) {
-        $self->_add_record( $writer, $record );
+        $self->_add_record( $record );
     }
 
-    $writer->endTag('group');
+    $self->writer->endTag('group');
 }
 
 sub _add_record {
-    my ( $self, $writer, $record ) = @_;
+    my ( $self, $record ) = @_;
 
-    return unless $writer && $record && ref $record eq 'HASH';
+    return unless $self->writer && $record && ref $record eq 'HASH';
 
     #url and mimetype are mandatory parameters for the record
     return unless $record->{'url'} && $record->{'mimetype'};
 
     my $attributes = $self->_record_attributes($record);
 
-    $writer->startTag( 'record', %{ $attributes || {} } );
+    $self->writer->startTag( 'record', %{ $attributes || {} } );
 
     if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
-        $self->_add_metadata( $writer, $record->{'metadata'} );
+        $self->_add_metadata( $record->{'metadata'} );
     }
 
-    $self->_record_content( $writer, $record )
+    $self->_record_content( $record )
         if $self->type eq 'full';
 
-    $writer->endTag('record');
+    $self->writer->endTag('record');
 }
 
 #adds record content part
 sub _record_content {
-    my ( $self, $writer, $record ) = @_;
+    my ( $self, $record ) = @_;
 
-    return unless $record->{'content'};
+    return unless $self->writer && $record->{'content'};
 
     if ( $record->{'mimetype'} eq 'text/plain' ) {
-        $writer->dataElement( 'content', $record->{'content'} );
+        $self->writer->dataElement( 'content', $record->{'content'} );
     }
     elsif ( $record->{'mimetype'} eq 'text/html' ) {
-        $writer->cdataElement( 'content', $record->{'content'} );
+        $self->writer->cdataElement( 'content', $record->{'content'} );
     }
 
     #else {
@@ -242,11 +250,11 @@ sub _record_attributes {
 }
 
 sub _add_metadata {
-    my ( $self, $writer, $metadata ) = @_;
+    my ( $self, $metadata ) = @_;
 
-    return unless scalar @{ $metadata || [] };
+    return unless $self->writer && scalar @{ $metadata || [] };
 
-    $writer->startTag('metadata');
+    $self->writer->startTag('metadata');
     for my $meta ( @{ $metadata || [] } ) {
         next unless $meta->{'name'} && $meta->{'content'};
 
@@ -255,10 +263,10 @@ sub _add_metadata {
             'content' => $meta->{'content'},
         );
 
-        $writer->dataElement( 'meta', '', %attributes );
+        $self->writer->dataElement( 'meta', '', %attributes );
     }
 
-    $writer->endTag('metadata');
+    $self->writer->endTag('metadata');
 }
 
 #receives a string representing a datetime and returns its RFC822 representation
