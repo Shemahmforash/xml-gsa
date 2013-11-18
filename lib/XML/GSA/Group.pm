@@ -52,20 +52,6 @@ sub action {
 }
 
 #other public methods
-sub add_record {
-    my ( $self, $record ) = @_;
-
-    return unless ref $record eq 'XML::GSA::Group::Record';
-
-    my @records = @{ $self->records() };
-
-    push @records, $record;
-
-    $self->{'records'} = @records;
-
-    return $record;
-}
-
 sub create {
     my ( $self, $feed ) = @_;
 
