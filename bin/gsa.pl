@@ -9,58 +9,17 @@ use DateTime;
 use Date::Parse;
 
 my $gsa = XML::GSA->new('base_url' => 'http://icdif.com');
-my $xml = $gsa->create(
-    [   {   'action'  => 'add',
-            'records' => [
-                {   'url'      => '/particulares',
-                    'mimetype' => 'text/plain',
-                    'action'   => 'delete',
-                },
-                {   'url'      => '/empresas',
-                    'mimetype' => 'text/plain',
-                    'metadata' => [
-                        { 'name' => 'og:title', 'content' => 'Empresas' },
-                    ],
-                }
-            ],
-        },
-    ]
-);
 
-=for
-my $xml = $gsa->create(
-    [   {   'action'  => 'add',
+$gsa->add_group({   'action'  => 'add',
             'records' => [
                 {   'url'      => '/particulares',
                     'mimetype' => 'text/plain',
                     'action'   => 'delete',
                 },
-                {   'url'      => '/empresas',
-                    'mimetype' => 'text/plain'
-                }
             ],
-        },
-        {   'action'  => 'delete',
-            'records' => [
-                {   'url'      => '/cliente',
-                    'mimetype' => 'text/plain',
-                    'action'   => 'delete',
-                    'metadata' => [
-                        { 'name' => 'John', 'content' => 'Jenny Wong' },
-                        {   'name' => 'url',
-                            'content' =>
-                                'http://www.corp.enterprise.com/search/employeesearch.php?q=jwong'
-                        }
-                    ],
-                },
-                {   'url'      => '/empresas',
-                    'mimetype' => 'text/plain'
-                }
-            ],
-        }
-    ]
-);
-=cut
+        } );
+
+my $xml = $gsa->create();
 
 print $xml;
 

@@ -5,7 +5,7 @@ use warnings;
 
 use charnames qw(:full);
 
-use Test::More tests => 43;
+use Test::More tests => 45;
 
 BEGIN {
     use_ok('XML::GSA');
@@ -13,14 +13,24 @@ BEGIN {
 
 my $gsa = new_ok('XML::GSA');
 
+$gsa = XML::GSA->new();
+
 can_ok( $gsa, qw(create type datasource xml base_url) );
 
 is( $gsa->type(), 'incremental', 'type is incremental by default' );
 
-is( $gsa->create(), undef, 'no arguments passed to create' );
 is( $gsa->create( {} ), undef, 'invalid argument passed to create' );
 is( $gsa->create(""), undef, 'another invalid argument passed to create' );
 
+is( $gsa->create(),
+    sprintf(
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header></gsafeed>',
+        $gsa->datasource(), $gsa->type()
+    ),
+    'no arguments passed to create'
+);
 is( $gsa->create( [] ),
     sprintf(
         '<?xml version="1.0" encoding="UTF-8"?>
@@ -51,6 +61,29 @@ is( $xml = $gsa->create( [ { 'action' => 'delete' } ] ),
         $gsa->datasource(), $gsa->type()
     ),
     'create xml using structure with one group and properties'
+);
+
+$gsa->add_group( { 'action' => 'delete' } );
+is( $xml = $gsa->create(),
+    sprintf(
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
+        $gsa->datasource(), $gsa->type()
+    ),
+    'create xml using structure with one group added manually and properties'
+);
+$gsa->clear_groups();
+
+$gsa->add_group( XML::GSA::Group->new( 'action' => 'delete' ) );
+is( $xml = $gsa->create(),
+    sprintf(
+        '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+<gsafeed><header><datasource>%s</datasource><feedtype>%s</feedtype></header><group action="delete"></group></gsafeed>',
+        $gsa->datasource(), $gsa->type()
+    ),
+    'create xml using structure with one group added manually and properties'
 );
 
 is( $xml = $gsa->create( [ { 'action' => 'delete', 'records' => [ {} ] } ] ),
@@ -232,7 +265,8 @@ like(
                     {   'url'      => '/particulares',
                         'mimetype' => 'text/plain',
                         'action'   => 'delete',
-                        'content'  => "Conte\N{LATIN SMALL LETTER U WITH ACUTE}do"
+                        'content' =>
+                            "Conte\N{LATIN SMALL LETTER U WITH ACUTE}do"
                     },
                 ]
             }

@@ -8,6 +8,7 @@ use Data::Dumper;
 use Carp;
 use DateTime    ();
 use Date::Parse ();
+use XML::GSA::Group;
 
 sub new {
     my $class = shift;
@@ -16,7 +17,8 @@ sub new {
         'type'       => 'incremental',
         'datasource' => 'web',
         @_,
-        'encoding'   => 'UTF-8',#read-only
+        'groups'   => [],
+        'encoding' => 'UTF-8',    #read-only
         },
         ref $class || $class;
 }
@@ -26,6 +28,25 @@ sub encoding {
     my $self = shift;
 
     return $self->{'encoding'};
+}
+
+#getters
+sub xml {
+    my $self = shift;
+
+    return $self->{'xml'};
+}
+
+sub to_string {
+    my $self = shift;
+
+    return $self->{'xml'};
+}
+
+sub writer {
+    my $self = shift;
+
+    return $self->{'writer'};
 }
 
 #getters and setters
@@ -56,18 +77,6 @@ sub base_url {
     return $self->{'base_url'};
 }
 
-sub xml {
-    my $self = shift;
-
-    return $self->{'xml'};
-}
-
-sub writer {
-    my $self = shift;
-
-    return $self->{'writer'};
-}
-
 sub groups {
     my $self = shift;
 
@@ -77,24 +86,46 @@ sub groups {
 sub add_group {
     my ( $self, $value ) = @_;
 
-    return unless ref $value eq 'HASH';
+    unless ( ref $value eq 'HASH' || ref $value eq 'XML::GSA::Group' ) {
+        carp("Must receive an HASH ref or an XML::GSA::Group object");
+        return;
+    }
 
-    my $groups = $self->groups();
+    my $group
+        = ref $value eq 'HASH'
+        ? XML::GSA::Group->new(
+        'action'  => $value->{'action'},
+        'records' => $value->{'records'}
+        )
+        : $value;
 
-    my $group = XML::GSA::Group->new( 'action' => $value->{'action'} );
+    push @{ $self->groups }, $group;
+}
 
-    $group->create( $value->{'records'} );
+#empties the group arrayref
+sub clear_groups {
+    my $self = shift;
+
+    $self->{'groups'} = [];
 }
 
 sub create {
     my ( $self, $data ) = @_;
 
-    unless ( ref $data eq 'ARRAY' ) {
-        carp("An array data structure must be passed as parameter");
-        return;
+    #use $self->groups
+    if ( !defined $data ) {
+        $data = $self->groups();
+    }
+    else {    #add each structure as new group, emptying the existing groups
+        unless ( ref $data eq 'ARRAY' ) {
+            carp("An array data structure must be passed as parameter");
+            return;
+        }
+
+        $self->clear_groups();
     }
 
-    my $writer = XML::Writer->new( OUTPUT => 'self', );
+    my $writer = XML::Writer->new( OUTPUT => 'self', 'UNSAFE' => 1 );
     $self->{'writer'} = $writer;
 
     $self->writer->xmlDecl( $self->encoding );
@@ -107,185 +138,29 @@ sub create {
     $self->writer->endTag('header');
 
     for my $group ( @{ $data || [] } ) {
-        $self->_add_group( $group );
+
+        #if not group, add it as one
+        unless ( ref $group eq 'XML::GSA::Group' ) {
+
+            $group = XML::GSA::Group->new(
+                'action'  => $group->{'action'},
+                'records' => $group->{'records'}
+            );
+        }
+        $group->create($self);
+
+        $self->writer->raw( $group->to_string );
     }
 
     $self->writer->endTag('gsafeed');
 
     my $xml = $self->writer->to_string;
+
     #gsa needs utf8 encoding
     utf8::encode($xml);
 
     $self->{'xml'} = $xml;
     return $xml;
-}
-
-sub _add_group {
-    my ( $self, $group ) = @_;
-
-    return unless $self->writer && $group && ref $group eq 'HASH';
-
-    my %attributes;
-    $attributes{'action'} = $group->{'action'}
-        if defined $group->{'action'};
-
-    $self->writer->startTag( 'group', %attributes );
-
-    for my $record ( @{ $group->{'records'} || [] } ) {
-        $self->_add_record( $record );
-    }
-
-    $self->writer->endTag('group');
-}
-
-sub _add_record {
-    my ( $self, $record ) = @_;
-
-    return unless $self->writer && $record && ref $record eq 'HASH';
-
-    #url and mimetype are mandatory parameters for the record
-    return unless $record->{'url'} && $record->{'mimetype'};
-
-    my $attributes = $self->_record_attributes($record);
-
-    $self->writer->startTag( 'record', %{ $attributes || {} } );
-
-    if ( $record->{'metadata'} && ref $record->{'metadata'} eq 'ARRAY' ) {
-        $self->_add_metadata( $record->{'metadata'} );
-    }
-
-    $self->_record_content( $record )
-        if $self->type eq 'full';
-
-    $self->writer->endTag('record');
-}
-
-#adds record content part
-sub _record_content {
-    my ( $self, $record ) = @_;
-
-    return unless $self->writer && $record->{'content'};
-
-    if ( $record->{'mimetype'} eq 'text/plain' ) {
-        $self->writer->dataElement( 'content', $record->{'content'} );
-    }
-    elsif ( $record->{'mimetype'} eq 'text/html' ) {
-        $self->writer->cdataElement( 'content', $record->{'content'} );
-    }
-
-    #else {
-    #TODO support other mimetype with base64 encoding content
-    #}
-}
-
-#creates record attributes
-sub _record_attributes {
-    my ( $self, $record ) = @_;
-
-    #must be a full record url
-    #that is: if no base url, the url in record must start with http
-    #base url and url in record can't include the domain at the same time
-    if (( !$self->base_url && $record->{'url'} !~ /^http/ )
-        || (   $self->base_url
-            && $self->base_url  =~ /^http/
-            && $record->{'url'} =~ /^http/ )
-        )
-    {
-        return {};
-    }
-
-    #mandatory attributes
-    my %attributes = (
-        'url' => $self->base_url
-        ? sprintf( '%s%s', $self->base_url, $record->{'url'} )
-        : $record->{'url'},
-        'mimetype' => $record->{'mimetype'},
-    );
-
-    ####optional attributes####
-
-    #action is delete or add
-    $attributes{'action'} = $record->{'action'}
-        if $record->{'action'}
-            && $record->{'action'} =~ /^(delete|add)$/;
-
-    #lock is true or false
-    $attributes{'lock'} = $record->{'lock'}
-        if $record->{'lock'}
-            && $record->{'lock'} =~ /^(true|false)$/;
-
-    $attributes{'displayurl'} = $record->{'displayurl'}
-        if $record->{'displayurl'};
-
-    #validate datetime format
-    if ( $record->{'last-modified'} ) {
-        my $date = $self->_to_RFC822_date( $record->{'last-modified'} );
-
-        $attributes{'last-modified'} = $date
-            if $date;
-    }
-
-    #allowed values for authmethod
-    $attributes{'authmethod'} = $record->{'authmethod'}
-        if $record->{'authmethod'}
-            && $record->{'authmethod'} =~ /^(none|httpbasic|ntlm|httpsso)$/;
-
-    $attributes{'pagerank'} = $record->{'pagerank'}
-        if $self->type ne 'metadata-and-url' && defined $record->{'pagerank'};
-
-    #true or false and only for web feeds
-    $attributes{'crawl-immediately'} = $record->{'crawl-immediately'}
-        if $self->datasource eq 'web'
-            && $record->{'crawl-immediately'}
-            && $record->{'crawl-immediately'} =~ /^(true|false)$/;
-
-    #for web feeds
-    $attributes{'crawl-once'} = $record->{'crawl-once'}
-        if ( $self->datasource eq 'web'
-        && $self->type() eq 'metadata-and-url'
-        && $record->{'crawl-once'}
-        && $record->{'crawl-once'} =~ /^(true|false)$/ );
-
-    return \%attributes;
-}
-
-sub _add_metadata {
-    my ( $self, $metadata ) = @_;
-
-    return unless $self->writer && scalar @{ $metadata || [] };
-
-    $self->writer->startTag('metadata');
-    for my $meta ( @{ $metadata || [] } ) {
-        next unless $meta->{'name'} && $meta->{'content'};
-
-        my %attributes = (
-            'name'    => $meta->{'name'},
-            'content' => $meta->{'content'},
-        );
-
-        $self->writer->dataElement( 'meta', '', %attributes );
-    }
-
-    $self->writer->endTag('metadata');
-}
-
-#receives a string representing a datetime and returns its RFC822 representation
-sub _to_RFC822_date {
-    my ( $self, $value ) = @_;
-
-    my $epoch = Date::Parse::str2time($value);
-
-    unless ($epoch) {
-        carp("Unknown date format received");
-        return;
-    }
-
-    my $datetime = DateTime->from_epoch(
-        'epoch'     => $epoch,
-        'time_zone' => 'local',
-    );
-
-    return $datetime->strftime('%a, %d %b %Y %H:%M:%S %z');
 }
 
 1;
@@ -301,7 +176,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
