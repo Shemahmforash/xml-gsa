@@ -202,9 +202,15 @@ sub _add_metadata {
     for my $meta ( @{ $metadata || [] } ) {
         next unless $meta->{'name'} && $meta->{'content'};
 
+        my $content = $meta->{'content'};
+
+        if( ref $content eq 'ARRAY' ) {
+            $content = join ';', @{ $content || [] };
+        }
+
         my %attributes = (
             'name'    => $meta->{'name'},
-            'content' => $meta->{'content'},
+            'content' => $content,
         );
 
         $self->writer->dataElement( 'meta', '', %attributes );
