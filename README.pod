@@ -143,6 +143,14 @@ Defines a base url to be preppended to all records' urls.
 
     Getter for the encoding used in this class
 
+=head2 groups
+
+    Getter for the array of groups added to this class
+
+=head2 writer
+
+    Getter for the XML::Writer object used in this class to create the xml
+
 =head1 AUTHOR
 
 Shemahmforash, C<< <shemahmforash at gmail.com> >>
