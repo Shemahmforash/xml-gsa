@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use charnames qw(:full);
+use XML::GSA::Group;
 
 use Test::More tests => 45;
 

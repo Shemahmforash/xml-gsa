@@ -247,11 +247,11 @@ XML::GSA::Group - A class that represents a group in gsa xml
 
 =head1 VERSION
 
-Version 0.02
+Version 0.04
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 =head2 new( C<$params> )
 
