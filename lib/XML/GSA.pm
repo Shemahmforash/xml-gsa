@@ -171,11 +171,11 @@ XML::GSA - Creates xml in google search appliance (GSA) format
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -207,20 +207,20 @@ You can use this lib in the following way:
 
 Which will output:
 
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
-<gsafeed><header><datasource>Source</datasource><feedtype>incremental</feedtype></header><group action="add"><record action="delete" url="http://www.foo.bar/aaa" mimetype="text/plain"></record><record url="http://www.foo.bar/bbb" mimetype="text/plain"><metadata><meta content="BBB" name="og:title"></meta></metadata></record></group></gsafeed>
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE gsafeed PUBLIC "-//Google//DTD GSA Feeds//EN" "">
+    <gsafeed><header><datasource>Source</datasource><feedtype>incremental</feedtype></header><group action="add"><record action="delete" url="http://www.foo.bar/aaa" mimetype="text/plain"></record><record url="http://www.foo.bar/bbb" mimetype="text/plain"><metadata><meta content="BBB" name="og:title"></meta></metadata></record></group></gsafeed>
 
 
 =head1 METHODS
 
 =head2 new( C<$params> )
 
-    Create a new XML::GSA object:
+Create a new XML::GSA object:
 
         my $gsa = XML::GSA->new('base_url' => 'http://foo.bar');
 
-    Arguments of this method are an anonymous hash of parameters:
+Arguments of this method are an anonymous hash of parameters:
 
 =head3 datasource
 
@@ -238,83 +238,83 @@ Defines a base url to be preppended to all records' urls.
 
 =head2 type( C<$value> )
 
-    Getter/setter for the type attribute of GSA feed. By default it is 'incremental'.
-    Possible values are 'incremental', 'full' or 'metadata-and-url'
+Getter/setter for the type attribute of GSA feed. By default it is 'incremental'.
+Possible values are 'incremental', 'full' or 'metadata-and-url'
 
 =cut
 
 =head2 datasource( C<$value> )
 
-    Getter/setter for the datasource attribute of GSA feed. By default it is 'web'.
+Getter/setter for the datasource attribute of GSA feed. By default it is 'web'.
 
 =cut
 
 =head2 base_url( C<$value> )
 
-    Getter/setter for the base_url attribute of GSA feed. This is an url that will be preppended to all record urls. If a base_url is not defined, one must pass full urls in the records data structure.
+Getter/setter for the base_url attribute of GSA feed. This is an url that will be preppended to all record urls. If a base_url is not defined, one must pass full urls in the records data structure.
 
 =cut
 
 =head2 create( C<$data> )
 
-    Receives an arrayref data structure where each entry represents a group in the xml, generates an xml in GSA format and returns it as a string.
-    Important note: All data passed to create must be in unicode! This class will utf-8 encode it making it compatible with GSA.
+Receives an arrayref data structure where each entry represents a group in the xml, generates an xml in GSA format and returns it as a string.
+Important note: All data passed to create must be in unicode! This class will utf-8 encode it making it compatible with GSA.
 
-    One can have has many group has one wants, and a group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
+One can have has many group has one wants, and a group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
 
-    Each hashref in the array corresponding to 'records' can have the following keys:
+Each hashref in the array corresponding to 'records' can have the following keys:
 
-    * Mandatory
-        * url
-        * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
-    * Optional
-        * action            => (add|delete)
-        * lock              => (true|false)
-        * displayurl        => an url
-        * last-modified     => a well formatted date as string
-        * authmethod        => (none|httpbasic|ntlm|httpsso)
-        * pagerank          => an int number
-        * crawl-immediately => (true|false)
-        * crawl-once        => (true|false)
+* Mandatory
+    * url
+    * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
+* Optional
+    * action            => (add|delete)
+    * lock              => (true|false)
+    * displayurl        => an url
+    * last-modified     => a well formatted date as string
+    * authmethod        => (none|httpbasic|ntlm|httpsso)
+    * pagerank          => an int number
+    * crawl-immediately => (true|false)
+    * crawl-once        => (true|false)
 
 =cut
 
 =head2 create
 
-    Creates the xml using the groups already added to the object.
+Creates the xml using the groups already added to the object.
 
 =head2 add_group( C<$group> )
 
-    Receives an hashref data structure representing a group and adds it to the current feed - you must call the `create` method with no arguments to have the xml updated. A group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
+Receives an hashref data structure representing a group and adds it to the current feed - you must call the `create` method with no arguments to have the xml updated. A group is an hashref with an optional key 'action' and a mandatory key 'records'. The key 'action' can have the values of 'add' or 'delete' and the 'records' key is an array of hashrefs.
 
-    Each hashref in the array corresponding to 'records' can have the following keys:
+Each hashref in the array corresponding to 'records' can have the following keys:
 
-    * Mandatory
-        * url
-        * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
-    * Optional
-        * action            => (add|delete)
-        * lock              => (true|false)
-        * displayurl        => an url
-        * last-modified     => a well formatted date as string
-        * authmethod        => (none|httpbasic|ntlm|httpsso)
-        * pagerank          => an int number
-        * crawl-immediately => (true|false)
-        * crawl-once        => (true|false)
+* Mandatory
+    * url
+    * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
+* Optional
+    * action            => (add|delete)
+    * lock              => (true|false)
+    * displayurl        => an url
+    * last-modified     => a well formatted date as string
+    * authmethod        => (none|httpbasic|ntlm|httpsso)
+    * pagerank          => an int number
+    * crawl-immediately => (true|false)
+    * crawl-once        => (true|false)
 
-    Important note: All data passed must be in unicode! This class will utf-8 encode it making it compatible with GSA.
+Important note: All data passed must be in unicode! This class will utf-8 encode it making it compatible with GSA.
 
 =head2 add_group( C<$group> )
 
-    Receives an instance of the class XML::GSA::Group and adds it to the current feed - you must call the `create` method with no arguments to have the xml updated.
+Receives an instance of the class XML::GSA::Group and adds it to the current feed - you must call the `create` method with no arguments to have the xml updated.
 
 =head2 clear_groups
 
-    Empties the property `groups` of this class.
+Empties the property `groups` of this class.
 
 =head2 xml
 
-    Getter for the xml generated by the `create` method.
+Getter for the xml generated by the `create` method.
 
 =head2 to_string
 
@@ -322,15 +322,15 @@ Defines a base url to be preppended to all records' urls.
 
 =head2 encoding
 
-    Getter for the encoding used in this class
+Getter for the encoding used in this class
 
 =head2 groups
 
-    Getter for the array of groups added to this class
+Getter for the array of groups added to this class
 
 =head2 writer
 
-    Getter for the XML::Writer object used in this class to create the xml
+Getter for the XML::Writer object used in this class to create the xml
 
 =cut
 
@@ -387,7 +387,7 @@ Great thanks to Andre Rivotti Casimiro for the invaluable suggestions and the he
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2013 Shemahmforash.
+Copyright 2013-2014 Shemahmforash.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
