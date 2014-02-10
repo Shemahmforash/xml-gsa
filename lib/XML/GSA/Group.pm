@@ -247,11 +247,13 @@ XML::GSA::Group - A class that represents a group in gsa xml
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
+
+=head1 METHODS
 
 =head2 new( C<$params> )
 
@@ -345,11 +347,6 @@ L<http://search.cpan.org/dist/XML-GSA/>
 L<https://github.com/Shemahmforash/xml-gsa/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-Great thanks to Andre Rivotti Casimiro for the invaluable suggestions and the help in setting a cpan compatible module.
 
 =head1 LICENSE AND COPYRIGHT
 

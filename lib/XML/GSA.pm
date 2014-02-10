@@ -171,11 +171,11 @@ XML::GSA - Creates xml in google search appliance (GSA) format
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -264,18 +264,18 @@ One can have has many group has one wants, and a group is an hashref with an opt
 
 Each hashref in the array corresponding to 'records' can have the following keys:
 
-* Mandatory
-    * url
-    * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
-* Optional
-    * action            => (add|delete)
-    * lock              => (true|false)
-    * displayurl        => an url
-    * last-modified     => a well formatted date as string
-    * authmethod        => (none|httpbasic|ntlm|httpsso)
-    * pagerank          => an int number
-    * crawl-immediately => (true|false)
-    * crawl-once        => (true|false)
+    * Mandatory
+        * url
+        * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
+    * Optional
+        * action            => (add|delete)
+        * lock              => (true|false)
+        * displayurl        => an url
+        * last-modified     => a well formatted date as string
+        * authmethod        => (none|httpbasic|ntlm|httpsso)
+        * pagerank          => an int number
+        * crawl-immediately => (true|false)
+        * crawl-once        => (true|false)
 
 =cut
 
@@ -289,18 +289,18 @@ Receives an hashref data structure representing a group and adds it to the curre
 
 Each hashref in the array corresponding to 'records' can have the following keys:
 
-* Mandatory
-    * url
-    * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
-* Optional
-    * action            => (add|delete)
-    * lock              => (true|false)
-    * displayurl        => an url
-    * last-modified     => a well formatted date as string
-    * authmethod        => (none|httpbasic|ntlm|httpsso)
-    * pagerank          => an int number
-    * crawl-immediately => (true|false)
-    * crawl-once        => (true|false)
+    * Mandatory
+        * url
+        * mimetype => (text/plain|text/html) - in the future it will also support other mimetype
+    * Optional
+        * action            => (add|delete)
+        * lock              => (true|false)
+        * displayurl        => an url
+        * last-modified     => a well formatted date as string
+        * authmethod        => (none|httpbasic|ntlm|httpsso)
+        * pagerank          => an int number
+        * crawl-immediately => (true|false)
+        * crawl-once        => (true|false)
 
 Important note: All data passed must be in unicode! This class will utf-8 encode it making it compatible with GSA.
 
@@ -379,11 +379,6 @@ L<http://search.cpan.org/dist/XML-GSA/>
 L<https://github.com/Shemahmforash/xml-gsa/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-Great thanks to Andre Rivotti Casimiro for the invaluable suggestions and the help in setting a cpan compatible module.
 
 =head1 LICENSE AND COPYRIGHT
 
